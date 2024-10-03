@@ -1,0 +1,26 @@
+{
+    "visual": {
+        "name": "matrixtableVisual",
+        "displayName": "matrixtableVisual",
+        "guid": "matrixtableVisualIconArrayChartByOfficeSolution",
+        "visualClassName": "Visual",
+        "version": "2.0.0.19",
+        "description": "its a matrixtableVisual made by office solutions",
+        "supportUrl": "https://innovationalofficesolution.com/power-bi-custom-charts",
+        "gitHubUrl": "https://github.com"
+    },
+    "apiVersion": "5.3.0",
+    "author": {
+        "name": "swapnil",
+        "email": "swapnil@innovationalofficesolution.com"
+    },
+    "assets": {
+        "icon": "assets/icon.png"
+    },
+    "externalJS": null,
+    "style": "style/visual.less",
+    "capabilities": "capabilities.json",
+    "dependencies": null,
+    "stringResources": [],
+    "version": "1.0.0.0"
+}

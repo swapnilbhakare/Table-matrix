@@ -1,0 +1,210 @@
+{
+    "dataRoles": [
+        {
+            "name": "row",
+            "kind": "GroupingOrMeasure",
+            "displayName": "Row"
+        },
+        {
+            "name": "col",
+            "kind": "GroupingOrMeasure",
+            "displayName": "Column"
+        },
+        {
+            "name": "subcol",
+            "kind": "GroupingOrMeasure",
+            "displayName": "Sub Column"
+        },
+        {
+            "name": "values",
+            "kind": "Measure",
+            "displayName": "values"
+        },
+        {
+            "name": "topN",
+            "kind": "GroupingOrMeasure",
+            "displayName": "Top N Filter"
+        }
+    ],
+    "objects": {
+        "dataPoint": {
+            "properties": {
+                "defaultColor": {
+                    "type": {
+                        "fill": {
+                            "solid": {
+                                "color": true
+                            }
+                        }
+                    }
+                },
+                "showAllDataPoints": {
+                    "type": {
+                        "bool": true
+                    }
+                },
+                "fill": {
+                    "type": {
+                        "fill": {
+                            "solid": {
+                                "color": true
+                            }
+                        }
+                    }
+                },
+                "fillRule": {
+                    "type": {
+                        "fill": {}
+                    }
+                },
+                "fontSize": {
+                    "type": {
+                        "formatting": {
+                            "fontSize": true
+                        }
+                    }
+                }
+            }
+        },
+        "tableSettings": {
+            "properties": {
+                "positiveValueColor": {
+                    "type": {
+                        "fill": {
+                            "solid": {
+                                "color": true
+                            }
+                        }
+                    }
+                },
+                "negativeValueColor": {
+                    "type": {
+                        "fill": {
+                            "solid": {
+                                "color": true
+                            }
+                        }
+                    }
+                },
+                "hideAbsoluteCYPY": {
+                    "type": {
+                        "bool": true
+                    }
+                }
+            }
+        },
+        "TopN": {
+            "displayName": "Top N",
+            "properties": {
+                "topN": {
+                    "displayName": "Top N",
+                    "type": {
+                        "text": true
+                    }
+                }
+            }
+        },
+        "ConditionalFormating": {
+            "displayName": "Conditional Formating",
+            "properties": {
+                "conditionalFormating": {
+                    "displayName": "Conditional Formating",
+                    "type": {
+                        "text": true
+                    }
+                }
+            }
+        },
+        "TopCompanies": {
+            "displayName": "Top Companies",
+            "properties": {
+                "topCompanies": {
+                    "displayName": "Top Companies",
+                    "type": {
+                        "text": true
+                    }
+                }
+            }
+        }
+    },
+    "dataViewMappings": [
+        {
+            "conditions": [
+                {
+                    "SortByColumn": {
+                        "max": 1
+                    }
+                },
+                {
+                    "col": {
+                        "max": 4
+                    }
+                },
+                {
+                    "row": {
+                        "max": 4
+                    }
+                },
+                {
+                    "subcol": {
+                        "max": 4
+                    }
+                },
+                {
+                    "subrow": {
+                        "max": 4
+                    }
+                }
+            ],
+            "categorical": {
+                "categories": {
+                    "select": [
+                        {
+                            "for": {
+                                "in": "col"
+                            }
+                        },
+                        {
+                            "for": {
+                                "in": "row"
+                            }
+                        },
+                        {
+                            "for": {
+                                "in": "subrow"
+                            }
+                        },
+                        {
+                            "for": {
+                                "in": "subcol"
+                            }
+                        },
+                        {
+                            "for": {
+                                "in": "ttcx"
+                            }
+                        }
+                    ],
+                    "dataReductionAlgorithm": {
+                        "sample": {
+                            "count": 999999999
+                        }
+                    }
+                },
+                "values": {
+                    "select": [
+                        {
+                            "for": {
+                                "in": "values"
+                            }
+                        }
+                    ]
+                }
+            }
+        }
+    ],
+    "sorting": {
+        "default": {}
+    },
+    "privileges": []
+}
