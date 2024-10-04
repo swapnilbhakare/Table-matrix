@@ -8,11 +8,6 @@ export const MenuCard = ({
 }) => {
   const [searchTerm, setSearchTerm] = useState("");
 
-  const truncateLabel = (label) => {
-    const words = label.split(" ");
-    return words.length > 2 ? `${words.slice(0, 1).join(" ")}...` : label;
-  };
-
   const filteredOptions = dropdownOptions
     .filter((option) => option.toLowerCase().includes(searchTerm.toLowerCase()))
     .sort((a, b) => a.localeCompare(b)); // Sort alphabetically
@@ -44,7 +39,7 @@ export const MenuCard = ({
             }}
             checked={selectedCheckboxes.includes(option)}
           >
-            {truncateLabel(option)} {/* Use the truncateLabel function here */}
+            {option} {/* Use the truncateLabel function here */}
           </Checkbox>
         </Menu.Item>
       ))}

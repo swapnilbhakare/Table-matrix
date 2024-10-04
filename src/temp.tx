@@ -41,12 +41,13 @@ const App: React.FC<{
   const [collapsedColumns, setCollapsedColumns] = useState<Set<string>>(
     new Set()
   );
+
   const [topNOn, setTopNOn] = useState([]);
   const [combinedData, setCombinedData] = useState<any[]>([]);
   const [selectedCheckboxes1, setSelectedCheckboxes1] = useState<string[]>([]); // State for first dropdown
   const [selectedCheckboxes2, setSelectedCheckboxes2] = useState<string[]>([]); // State for second dropdown
   const [dropdownOptions, setDropdownOptions] = useState<any>([]);
-
+  const [subcolDefination, setSubColDefination] = useState<any[]>([]);
   const formatting: any =
     formattingSettings?.conditionalformating?.conditionalformating?.value;
   const Companies: any =
@@ -132,9 +133,7 @@ const App: React.FC<{
               rowData["TopNOn"] = topNOn.values[rowIndex];
             }
             rowData[`dynamic_row_${rowIdx}`] =
-              rowIdx === 0
-                ? mapValuesToPriceTiers(row.values[rowIndex])
-                : row.values[rowIndex];
+              rowIdx === 0 ? row.values[rowIndex] : row.values[rowIndex];
           });
 
           subCols.values.forEach((subCol, subColIndex) => {
@@ -198,6 +197,9 @@ const App: React.FC<{
       if (
         !parentSubColumnMap.get(parentCol)?.some((col) => col.title === subCol)
       ) {
+        const isGrowthColumn =
+          parentCol === "% Growth (CY vs PY)" || parentCol === "CAGR";
+
         const subColumnDefinition = {
           title: subCol,
           dataIndex: `${parentCol}_${subCol}`,
@@ -214,16 +216,26 @@ const App: React.FC<{
             const isAbsoluteColumn =
               parentCol.startsWith("Absolute Values") ||
               parentCol.startsWith("Absolute Change") ||
-              parentCol.startsWith("Absolute Change CY vs PY_All");
+              parentCol.startsWith("Absolute Change CY vs PY_All") ||
+              parentCol.startsWith("% Growth");
             if (isAbsoluteColumn) {
               const color =
                 Number(text) < 0 ? "red" : Number(text) > 0 ? "green" : "black";
+              if (parentCol === "% Growth (CY vs PY)") {
+                return <div style={{ color }}>{text}%</div>;
+              }
+
               return <div style={{ color }}>{text}</div>;
             }
+            if (isGrowthColumn) {
+              return <div>{`${text}%`}</div>;
+            }
+
             return <div>{text}</div>;
           },
         };
 
+        setSubColDefination((prevState) => [...prevState, subColumnDefinition]);
         parentSubColumnMap.get(parentCol)?.push(subColumnDefinition);
       }
     });
@@ -256,19 +268,25 @@ const App: React.FC<{
               );
 
             const total = keys.reduce(
-              (acc, key) => acc + (Number(record[key]) || 0),
+              (acc, key) => acc + (record[key] || 0),
               0
             );
 
-            const color = shouldColor
-              ? total < 0
-                ? "red"
-                : total > 0
-                ? "green"
-                : "black"
-              : "black";
+            let color = "black"; // Default color
+            if (shouldColor) {
+              color = total < 0 ? "red" : total > 0 ? "green" : "black";
+            }
+            const isGrowthColumn =
+              parentCol === "% Growth (CY vs PY)" || parentCol === "CAGR";
+            if (parentCol.startsWith("% Growth")) {
+              color = total < 0 ? "red" : total > 0 ? "green" : "black"; // Color based on total for growth columns
+            }
 
-            return <span style={{ color }}>{total}</span>;
+            return (
+              <span style={{ color }}>
+                {isGrowthColumn ? `${total}%` : total}
+              </span>
+            );
           },
         };
 
@@ -498,7 +516,10 @@ const App: React.FC<{
   );
 
   console.log(columnDefinitions, "dynamicRowColumnsdynamicRowColumns");
-
+  console.log(
+    subcolDefination,
+    "subcolDefinationsubcolDefinationsubcolDefination"
+  );
   const mergeRows = (data) => {
     const mergedData = {};
 
@@ -509,64 +530,134 @@ const App: React.FC<{
       if (!mergedData[key]) {
         // Initialize if it doesn't exist
         mergedData[key] = {
-          dynamic_row_0: row.dynamic_row_0,
+          dynamic_row_0: row.dynamic_row_0 || 0, // Initialize dynamic_row_0
           dynamic_row_1: row.dynamic_row_1,
           dynamic_row_2: row.dynamic_row_2,
           dynamic_row_3: row.dynamic_row_3,
           dynamic_row_4: row.dynamic_row_4,
-          dynamic_row_5: row.dynamic_row_5,
-          // Initialize aggregated values for current year and previous year
-          "Current Year_All": 0,
-          "Current Year_MS": 0,
-          "Current Year_SS": 0,
-          "Current Year_MP": 0,
-          "Previous Year_All": 0,
-          "Previous Year_MS": 0,
-          "Previous Year_SS": 0,
-          "Previous Year_MP": 0,
-          "Absolute Change CY vs PY_All": 0,
-          "Absolute Change CY vs PY_MS": 0,
-          "Absolute Change CY vs PY_SS": 0,
-          "Absolute Change CY vs PY_MP": 0,
-          "Price Index": row["Price Index"] || 0, // Initialize Price Index for the first row with this key
+          dynamic_row_5: row.dynamic_row_5 || 0,
+          dynamic_row_6: row.dynamic_row_6 || 0,
+          "Price Index": row["Price Index"] || 0,
+          "Absolute Values CY PY_All": 0, // Changed from "Absolute Change"
+          "Absolute Values CY PY_MS": 0, // Changed from "Absolute Change"
+          "Absolute Values CY PY_SS": 0, // Changed from "Absolute Change"
+          "Absolute Values CY PY_MP": 0, // Changed from "Absolute Change"
           TopNOn: row["TopNOn"] || 0,
         };
+
+        // Initialize aggregated values for Current Year, Previous Year, and Absolute Change using subcolDefination
+        subcolDefination.forEach((col) => {
+          mergedData[key][col.dataIndex] = 0;
+        });
       } else {
-        // If the key already exists, we don't add the Price Index again
-        mergedData[key]["Price Index"] = mergedData[key]["Price Index"] || 0; // Keep original Price Index
+        // Aggregate dynamic_row_0 and other non-subcolumn data
+        mergedData[key]["dynamic_row_0"] += row.dynamic_row_0 || 0;
+        mergedData[key]["Price Index"] += row["Price Index"] || 0;
+        mergedData[key]["TopNOn"] += row.TopNOn || 0;
+        mergedData[key]["dynamic_row_4"] += row.dynamic_row_4 || 0;
+        mergedData[key]["dynamic_row_5"] += row.dynamic_row_5 || 0;
       }
+      mergedData[key]["Absolute Values CY PY_All"] +=
+        row["Absolute Values CY PY_All"] || 0;
+      mergedData[key]["Absolute Values CY PY_MS"] +=
+        row["Absolute Values CY PY_MS"] || 0;
+      mergedData[key]["Absolute Values CY PY_SS"] +=
+        row["Absolute Values CY PY_SS"] || 0;
+      mergedData[key]["Absolute Values CY PY_MP"] +=
+        row["Absolute Values CY PY_MP"] || 0;
 
-      // Aggregate the values for Current Year and Previous Year
-      mergedData[key]["Current Year_All"] += row["Current Year_All"] || 0;
-      mergedData[key]["Current Year_MS"] += row["Current Year_MS"] || 0;
-      mergedData[key]["Current Year_SS"] += row["Current Year_SS"] || 0;
-      mergedData[key]["Current Year_MP"] += row["Current Year_MP"] || 0;
-
-      mergedData[key]["Previous Year_All"] += row["Previous Year_All"] || 0;
-      mergedData[key]["Previous Year_MS"] += row["Previous Year_MS"] || 0;
-      mergedData[key]["Previous Year_SS"] += row["Previous Year_SS"] || 0;
-      mergedData[key]["Previous Year_MP"] += row["Previous Year_MP"] || 0;
-
-      // Calculate the Absolute Change CY vs PY
-      mergedData[key]["Absolute Change CY vs PY_MS"] +=
-        row["Absolute Change CY vs PY_MS"] || 0;
-      mergedData[key]["Absolute Change CY vs PY_SS"] +=
-        row["Absolute Change CY vs PY_SS"] || 0;
-      mergedData[key]["Absolute Change CY vs PY_MP"] +=
-        row["Absolute Change CY vs PY_MP"] || 0;
+      // Aggregate values for Current Year, Previous Year, and Absolute Change using subcolDefination
+      subcolDefination.forEach((col) => {
+        mergedData[key][col.dataIndex] += row[col.dataIndex] || 0;
+      });
     });
 
     // Convert the merged data object back into an array
     return Object.values(mergedData);
   };
+  // const mergeRows = (data) => {
+  //   const mergedData = {};
+
+  //   data.forEach((row) => {
+  //     // Create a unique key based on dynamic rows
+  //     const key = `"${row.dynamic_row_1}-${row.dynamic_row_2}-${row.dynamic_row_3}"`;
+
+  //     if (!mergedData[key]) {
+  //       // Initialize if it doesn't exist
+  //       mergedData[key] = {
+  //         dynamic_row_0: row.dynamic_row_0 || 0, // Initialize dynamic_row_0
+  //         dynamic_row_1: row.dynamic_row_1,
+  //         dynamic_row_2: row.dynamic_row_2,
+  //         dynamic_row_3: row.dynamic_row_3,
+  //         dynamic_row_4: row.dynamic_row_4,
+  //         dynamic_row_5: row.dynamic_row_5, // Ensure it's a number for aggregation
+  //         dynamic_row_6: row.dynamic_row_6, // Ensure it's a number for aggregation
+  //         // Initialize aggregated values for current year and previous year
+  //         "Current Year_All": 0,
+  //         "Current Year_MS": 0,
+  //         "Current Year_SS": 0,
+  //         "Current Year_MP": 0,
+  //         "Previous Year_All": 0,
+  //         "Previous Year_MS": 0,
+  //         "Previous Year_SS": 0,
+  //         "Previous Year_MP": 0,
+  //         "Absolute Change CY vs PY_All": 0,
+  //         "Absolute Change CY vs PY_MS": 0,
+  //         "Absolute Change CY vs PY_SS": 0,
+  //         "Absolute Change CY vs PY_MP": 0,
+  //         "Price Index": row["Price Index"] || 0, // Initialize Price Index
+  //         TopNOn: row["TopNOn"] || 0,
+  //       };
+  //     } else {
+  //       // Aggregate dynamic_row_0
+  //       mergedData[key]["dynamic_row_0"] += row.dynamic_row_0 || 0;
+  //       // Aggregate Price Index
+  //       mergedData[key]["Price Index"] += row["Price Index"] || 0;
+
+  //       // Aggregate dynamic_row_5 and dynamic_row_6
+  //       mergedData[key]["TopNOn"] += row.TopNOn || 0;
+
+  //       mergedData[key]["dynamic_row_4"] += row.dynamic_row_4 || 0; // Sum dynamic_row_5
+  //       mergedData[key]["dynamic_row_5"] += row.dynamic_row_5 || 0; // Sum dynamic_row_6
+  //     }
+
+  //     // Aggregate the values for Current Year and Previous Year
+  //     mergedData[key]["Current Year_All"] += row["Current Year_All"] || 0;
+  //     mergedData[key]["Current Year_MS"] += row["Current Year_MS"] || 0;
+  //     mergedData[key]["Current Year_SS"] += row["Current Year_SS"] || 0;
+  //     mergedData[key]["Current Year_MP"] += row["Current Year_MP"] || 0;
+
+  //     mergedData[key]["Previous Year_All"] += row["Previous Year_All"] || 0;
+  //     mergedData[key]["Previous Year_MS"] += row["Previous Year_MS"] || 0;
+  //     mergedData[key]["Previous Year_SS"] += row["Previous Year_SS"] || 0;
+  //     mergedData[key]["Previous Year_MP"] += row["Previous Year_MP"] || 0;
+
+  //     // Calculate the Absolute Change CY vs PY
+  //     mergedData[key]["Absolute Change CY vs PY_MS"] +=
+  //       row["Absolute Change CY vs PY_MS"] || 0;
+  //     mergedData[key]["Absolute Change CY vs PY_SS"] +=
+  //       row["Absolute Change CY vs PY_SS"] || 0;
+  //     mergedData[key]["Absolute Change CY vs PY_MP"] +=
+  //       row["Absolute Change CY vs PY_MP"] || 0;
+  //   });
+
+  //   // Convert the merged data object back into an array
+  //   return Object.values(mergedData);
+  // };
 
   const tableData = useMemo(() => {
     if (!rows.length || !columns.values) return [];
     // Step 5: Combine company data and sorted non-company data
     console.log(combinedData, "combinedDatacombinedDatacombinedData");
     const meargedData = mergeRows(combinedData);
+    const processedData = meargedData.map((row) => {
+      row["dynamic_row_0"] = mapValuesToPriceTiers(row["dynamic_row_0"]);
+      return row;
+    });
+    console.log(processedData, "processedDataprocessedDataprocessedData");
+
     console.log(meargedData, "meargedDatameargedDatameargedDatameargedData");
-    const combinedRows = meargedData;
+    const combinedRows = processedData;
     const sortByTopN = (data) => {
       return data.sort((a, b) => {
         const aTopN = a["TopNOn"] ?? 0; // Replace with appropriate field if 'TopNOn' is different
@@ -575,7 +666,7 @@ const App: React.FC<{
       });
     };
     const sortedAllTableData = sortByTopN(combinedRows);
-
+    console.log(sortedAllTableData, "sorting as per topN");
     const allTableData = aggregateData(combinedRows);
 
     let filteredData = allTableData;
@@ -635,12 +726,24 @@ const App: React.FC<{
       }
     }
 
+    // // Step 8: Filter by custom order
+    // const filteredDataByOrder = filteredData.filter((row) => {
+    //   const rowValue = row[`dynamic_row_0`];
+    //   return customOrder.includes(rowValue?.toString());
+    // });
+
     // Step 8: Filter by custom order
-    const filteredDataByOrder = filteredData.filter((row) => {
-      const rowValue = row[`dynamic_row_0`];
-      if (rowValue === 0 || rowValue === null) return;
-      return customOrder.includes(rowValue?.toString());
-    });
+    const filteredDataByOrder = filteredData
+      .filter((row) => {
+        const rowValue = row[`dynamic_row_0`];
+        if (rowValue === 0 || rowValue === null) return;
+        return customOrder.includes(rowValue?.toString());
+      })
+      .sort(sortByCustomOrder);
+    console.log(
+      filteredDataByOrder,
+      "filteredDataByOrderfilteredDataByOrderfilteredDataByOrder"
+    );
 
     const remainingEntriesCount = Math.max(
       0,
@@ -654,6 +757,10 @@ const App: React.FC<{
           customOrder.includes(row[`dynamic_row_0`]?.toString())
       )
       .slice(0, remainingEntriesCount);
+    console.log(
+      additionalEntries,
+      "additionalEntriesadditionalEntriesadditionalEntries"
+    );
 
     const sortAdditonalData = (data) => {
       return data.sort((a, b) => {
@@ -663,10 +770,6 @@ const App: React.FC<{
       });
     };
     const sortedTableData = sortByTopN(additionalEntries);
-    console.log(
-      sortedTableData,
-      "additionalEntriesadditionalEntriesadditionalEntries"
-    );
 
     // Combine filtered data and additional entries
     const prefinalData = [...filteredDataByOrder, ...sortedTableData];

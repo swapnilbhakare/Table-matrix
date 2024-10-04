@@ -51,8 +51,8 @@ export const customOrder = [
   "Premium",
   "Upper Mainstream",
   "Mainstream",
-  "Super Value",
   "Value",
+  "Super Value",
 ];
 
 export const extractDynamicValues = (data: any[], columnPattern: string) => {

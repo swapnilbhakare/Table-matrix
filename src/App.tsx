@@ -222,17 +222,18 @@ const App: React.FC<{
               const color =
                 Number(text) < 0 ? "red" : Number(text) > 0 ? "green" : "black";
               if (parentCol === "% Growth (CY vs PY)") {
-                return <div style={{ color }}>{text}%</div>;
+                return (
+                  <div style={{ color }}>{`${Number(text).toFixed(2)}%`}</div>
+                );
               }
 
-              return <div style={{ color }}>{text}</div>;
+              return <div style={{ color }}>{Number(text).toFixed(2)}</div>;
             }
             if (isGrowthColumn) {
-              const value = Number(text);
-              return <div>{`${value}%`}</div>;
+              return <div>{`${Number(text).toFixed(2)}%`}</div>;
             }
 
-            return <div>{text}</div>;
+            return <div>{Number(text).toFixed(2)}</div>;
           },
         };
 
@@ -269,7 +270,7 @@ const App: React.FC<{
               );
 
             const total = keys.reduce(
-              (acc, key) => acc + (Number(record[key]) || 0),
+              (acc, key) => acc + (record[key] || 0),
               0
             );
 
@@ -285,8 +286,7 @@ const App: React.FC<{
 
             return (
               <span style={{ color }}>
-                {" "}
-                {isGrowthColumn ? `${total}%` : total}
+                {isGrowthColumn ? `${total.toFixed(2)}%` : total.toFixed(2)}
               </span>
             );
           },
@@ -324,7 +324,7 @@ const App: React.FC<{
             render: (text: any, record: DataType) => {
               const color =
                 Number(text) < 0 ? "red" : Number(text) > 0 ? "green" : "black";
-              return <div style={{ color }}>{text}</div>;
+              return <div style={{ color }}>{text.toFixed(2)}</div>;
             },
           };
 
@@ -361,7 +361,7 @@ const App: React.FC<{
             0
           );
           const color = total < 0 ? "red" : total > 0 ? "green" : "black";
-          return <span style={{ color }}>{total}</span>;
+          return <span style={{ color }}>{total.toFixed(2)}</span>;
         },
       };
 
@@ -522,6 +522,7 @@ const App: React.FC<{
     subcolDefination,
     "subcolDefinationsubcolDefinationsubcolDefination"
   );
+
   const mergeRows = (data) => {
     const mergedData = {};
 
@@ -577,76 +578,14 @@ const App: React.FC<{
     // Convert the merged data object back into an array
     return Object.values(mergedData);
   };
-  // const mergeRows = (data) => {
-  //   const mergedData = {};
 
-  //   data.forEach((row) => {
-  //     // Create a unique key based on dynamic rows
-  //     const key = `"${row.dynamic_row_1}-${row.dynamic_row_2}-${row.dynamic_row_3}"`;
-
-  //     if (!mergedData[key]) {
-  //       // Initialize if it doesn't exist
-  //       mergedData[key] = {
-  //         dynamic_row_0: row.dynamic_row_0 || 0, // Initialize dynamic_row_0
-  //         dynamic_row_1: row.dynamic_row_1,
-  //         dynamic_row_2: row.dynamic_row_2,
-  //         dynamic_row_3: row.dynamic_row_3,
-  //         dynamic_row_4: row.dynamic_row_4,
-  //         dynamic_row_5: row.dynamic_row_5, // Ensure it's a number for aggregation
-  //         dynamic_row_6: row.dynamic_row_6, // Ensure it's a number for aggregation
-  //         // Initialize aggregated values for current year and previous year
-  //         "Current Year_All": 0,
-  //         "Current Year_MS": 0,
-  //         "Current Year_SS": 0,
-  //         "Current Year_MP": 0,
-  //         "Previous Year_All": 0,
-  //         "Previous Year_MS": 0,
-  //         "Previous Year_SS": 0,
-  //         "Previous Year_MP": 0,
-  //         "Absolute Change CY vs PY_All": 0,
-  //         "Absolute Change CY vs PY_MS": 0,
-  //         "Absolute Change CY vs PY_SS": 0,
-  //         "Absolute Change CY vs PY_MP": 0,
-  //         "Price Index": row["Price Index"] || 0, // Initialize Price Index
-  //         TopNOn: row["TopNOn"] || 0,
-  //       };
-  //     } else {
-  //       // Aggregate dynamic_row_0
-  //       mergedData[key]["dynamic_row_0"] += row.dynamic_row_0 || 0;
-  //       // Aggregate Price Index
-  //       mergedData[key]["Price Index"] += row["Price Index"] || 0;
-
-  //       // Aggregate dynamic_row_5 and dynamic_row_6
-  //       mergedData[key]["TopNOn"] += row.TopNOn || 0;
-
-  //       mergedData[key]["dynamic_row_4"] += row.dynamic_row_4 || 0; // Sum dynamic_row_5
-  //       mergedData[key]["dynamic_row_5"] += row.dynamic_row_5 || 0; // Sum dynamic_row_6
-  //     }
-
-  //     // Aggregate the values for Current Year and Previous Year
-  //     mergedData[key]["Current Year_All"] += row["Current Year_All"] || 0;
-  //     mergedData[key]["Current Year_MS"] += row["Current Year_MS"] || 0;
-  //     mergedData[key]["Current Year_SS"] += row["Current Year_SS"] || 0;
-  //     mergedData[key]["Current Year_MP"] += row["Current Year_MP"] || 0;
-
-  //     mergedData[key]["Previous Year_All"] += row["Previous Year_All"] || 0;
-  //     mergedData[key]["Previous Year_MS"] += row["Previous Year_MS"] || 0;
-  //     mergedData[key]["Previous Year_SS"] += row["Previous Year_SS"] || 0;
-  //     mergedData[key]["Previous Year_MP"] += row["Previous Year_MP"] || 0;
-
-  //     // Calculate the Absolute Change CY vs PY
-  //     mergedData[key]["Absolute Change CY vs PY_MS"] +=
-  //       row["Absolute Change CY vs PY_MS"] || 0;
-  //     mergedData[key]["Absolute Change CY vs PY_SS"] +=
-  //       row["Absolute Change CY vs PY_SS"] || 0;
-  //     mergedData[key]["Absolute Change CY vs PY_MP"] +=
-  //       row["Absolute Change CY vs PY_MP"] || 0;
-  //   });
-
-  //   // Convert the merged data object back into an array
-  //   return Object.values(mergedData);
-  // };
-
+  const sortByTopN = (data) => {
+    return data.sort((a, b) => {
+      const aTopN = a["TopNOn"] ?? 0; // Replace with appropriate field if 'TopNOn' is different
+      const bTopN = b["TopNOn"] ?? 0;
+      return bTopN - aTopN; // Sorting descending by TopN
+    });
+  };
   const tableData = useMemo(() => {
     if (!rows.length || !columns.values) return [];
     // Step 5: Combine company data and sorted non-company data
@@ -660,13 +599,7 @@ const App: React.FC<{
 
     console.log(meargedData, "meargedDatameargedDatameargedDatameargedData");
     const combinedRows = processedData;
-    const sortByTopN = (data) => {
-      return data.sort((a, b) => {
-        const aTopN = a["TopNOn"] ?? 0; // Replace with appropriate field if 'TopNOn' is different
-        const bTopN = b["TopNOn"] ?? 0;
-        return bTopN - aTopN; // Sorting descending by TopN
-      });
-    };
+
     const sortedAllTableData = sortByTopN(combinedRows);
     console.log(sortedAllTableData, "sorting as per topN");
     const allTableData = aggregateData(combinedRows);
@@ -728,12 +661,6 @@ const App: React.FC<{
       }
     }
 
-    // // Step 8: Filter by custom order
-    // const filteredDataByOrder = filteredData.filter((row) => {
-    //   const rowValue = row[`dynamic_row_0`];
-    //   return customOrder.includes(rowValue?.toString());
-    // });
-
     // Step 8: Filter by custom order
     const filteredDataByOrder = filteredData
       .filter((row) => {
@@ -764,14 +691,8 @@ const App: React.FC<{
       "additionalEntriesadditionalEntriesadditionalEntries"
     );
 
-    const sortAdditonalData = (data) => {
-      return data.sort((a, b) => {
-        const aTopN = a["Price Index"] ?? 0; // Replace with appropriate field if 'TopNOn' is different
-        const bTopN = b["Price Index"] ?? 0;
-        return bTopN - aTopN; // Sorting descending by TopN
-      });
-    };
-    const sortedTableData = sortByTopN(additionalEntries);
+    const sortedTableData =
+      sortByTopN(additionalEntries).sort(sortByCustomOrder);
 
     // Combine filtered data and additional entries
     const prefinalData = [...filteredDataByOrder, ...sortedTableData];
@@ -795,15 +716,14 @@ const App: React.FC<{
     customOrder, // Add customOrder as dependency
   ]);
 
-  const sortByTopN = (data) => {
+  const sortByPriceIndex = (data) => {
     return data.sort((a, b) => {
       const aTopN = a["Price Index"] ?? 0; // Replace with appropriate field if 'TopNOn' is different
       const bTopN = b["Price Index"] ?? 0;
       return bTopN - aTopN; // Sorting descending by TopN
     });
   };
-
-  const sortedTableData = sortByTopN(tableData);
+  const sortedTableData = sortByPriceIndex(tableData);
   console.log(sortedTableData, "sortedTableDatasortedTableDatasortedTableData");
   useEffect(() => {
     const styleSheet = document.createElement("style");
