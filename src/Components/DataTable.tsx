@@ -4,7 +4,7 @@ import { Table } from "antd";
 const DataTable = ({ tableColumns, tableData }) => {
   return (
     <Table
-      columns={tableColumns} // Ensure column widths are large enough
+      columns={tableColumns}
       dataSource={tableData}
       bordered
       size="small"

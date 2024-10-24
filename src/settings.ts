@@ -95,9 +95,43 @@ class TableSettings extends FormattingSettingsCard {
     displayName: "Hide Absolute CY PY",
     value: false,
   });
+  hideAllCol = new formattingSettings.ToggleSwitch({
+    name: "hideAllCol",
+    displayName: "Hide All sub Column",
+    value: false,
+  });
+  allColumnLogic = new formattingSettings.ItemDropdown({
+    name: "allColumnLogic",
+    displayName: "All column Options :",
+    items: [
+      { value: "sum", displayName: "Sum" },
+      { value: "division", displayName: "Division" },
+      { value: "normal", displayName: "Normal" },
+    ],
+    value: { value: "sum", displayName: "Sum" }, // Default selection
+  });
+  precisonPlace = new formattingSettings.ItemDropdown({
+    name: "precisonPlace",
+    displayName: "Precison Place",
+    items: [
+      { value: 0, displayName: "0." }, // Default selection
+      { value: 1, displayName: "0.0" }, // Default selection
+      { value: 2, displayName: "0.00" }, // Default selection
+      { value: 3, displayName: "0.000" },
+      { value: 4, displayName: "0.0000" },
+      { value: 5, displayName: "0.00000" },
+    ],
+    value: { value: 2, displayName: "0.00" }, // Default selection
+  });
+
   name: string = "tableSettings";
   displayName: string = "Table Settings";
-  slices: Array<FormattingSettingsSlice> = [this.hideAbsoluteCYPY];
+  slices: Array<FormattingSettingsSlice> = [
+    this.hideAbsoluteCYPY,
+    this.hideAllCol,
+    this.allColumnLogic,
+    this.precisonPlace,
+  ];
 }
 
 /**

@@ -24,6 +24,21 @@
             "name": "topN",
             "kind": "GroupingOrMeasure",
             "displayName": "Top N Filter"
+        },
+        {
+            "name": "division",
+            "kind": "GroupingOrMeasure",
+            "displayName": "Division on"
+        },
+        {
+            "name": "volume",
+            "kind": "GroupingOrMeasure",
+            "displayName": "Volume"
+        },
+        {
+            "name": "brandIndex",
+            "kind": "GroupingOrMeasure",
+            "displayName": "Brand Index"
         }
     ],
     "objects": {
@@ -89,6 +104,59 @@
                 "hideAbsoluteCYPY": {
                     "type": {
                         "bool": true
+                    }
+                },
+                "hideAllCol": {
+                    "type": {
+                        "bool": true
+                    }
+                },
+                "allColumnLogic": {
+                    "type": {
+                        "enumeration": [
+                            {
+                                "value": "style1",
+                                "displayName": "Style 1"
+                            },
+                            {
+                                "value": "style2",
+                                "displayName": "Style 2"
+                            },
+                            {
+                                "value": "style3",
+                                "displayName": "Style 3"
+                            }
+                        ]
+                    }
+                },
+                "precisonPlace": {
+                    "type": {
+                        "enumeration": [
+                            {
+                                "value": "0",
+                                "displayName": "0."
+                            },
+                            {
+                                "value": "1",
+                                "displayName": "0.0"
+                            },
+                            {
+                                "value": "2",
+                                "displayName": "0.00"
+                            },
+                            {
+                                "value": "3",
+                                "displayName": "0.000"
+                            },
+                            {
+                                "value": "4",
+                                "displayName": "0.0000"
+                            },
+                            {
+                                "value": "5",
+                                "displayName": "0.00000"
+                            }
+                        ]
                     }
                 }
             }
@@ -182,6 +250,21 @@
                         {
                             "for": {
                                 "in": "ttcx"
+                            }
+                        },
+                        {
+                            "for": {
+                                "in": "division"
+                            }
+                        },
+                        {
+                            "for": {
+                                "in": "volume"
+                            }
+                        },
+                        {
+                            "for": {
+                                "in": "brandIndex"
                             }
                         }
                     ],

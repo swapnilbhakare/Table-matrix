@@ -1,3 +1,4 @@
+import { formatNumberWithCommas } from "./dataUtils";
 interface Row {
   source: {
     value?: unknown; // Use unknown to account for both numbers and strings
@@ -178,12 +179,14 @@ export const createDynamicRow = (
   dynamicRowColumns: any,
   columnDefinitions: any
 ): DataType => {
-  const dynamicRow: DataType = { key: "dynamic_row_end" }; // Unique key for the dynamic row
+  const dynamicRow: DataType = { key: "dynamic_row_end", isTotalRow: true }; // Unique key for the dynamic row
 
   const firstColumnDataIndex = dynamicRowColumns[0]?.dataIndex;
   if (firstColumnDataIndex) {
     dynamicRow[firstColumnDataIndex] = "Total"; // Ensure it is the correct column at 0th index
+    dynamicRow[`${firstColumnDataIndex}_class`] = "total-cell";
   }
+  console.log(firstColumnDataIndex);
 
   // Only calculate totals for the last two dynamicRowColumns
   const lastTwoDynamicRowColumns = dynamicRowColumns.slice(-2); // Get the last two dynamicRowColumns
@@ -191,7 +194,6 @@ export const createDynamicRow = (
   lastTwoDynamicRowColumns.forEach((column: any) => {
     const dataIndex = column.dataIndex;
     const isNumeric = tableData.some((row) => !isNaN(Number(row[dataIndex]))); // Check if column contains numeric values
-
     if (isNumeric) {
       // Calculate the sum for numeric columns
       const sum = tableData.reduce(
@@ -203,15 +205,17 @@ export const createDynamicRow = (
       dynamicRow[dataIndex] = ""; // Set placeholders for non-numeric columns
     }
   });
-
   // Ensure all other columns (from columnDefinitions) are left empty
   columnDefinitions.forEach((column: any) => {
     const dataIndex = column.dataIndex;
-
+    dynamicRow[dataIndex] = "";
+    if (column.title === "All") {
+      dynamicRow[dataIndex] = ""; // Leave "All" columns empty
+    }
     if (column.children) {
       // Set empty for all sub-columns
       column.children.forEach((subColumn: any) => {
-        dynamicRow[subColumn.dataIndex] = ""; // Leave sub-columns empty
+        dynamicRow[subColumn.key] = "";
       });
     } else {
       dynamicRow[dataIndex] = ""; // Leave top-level columns empty
