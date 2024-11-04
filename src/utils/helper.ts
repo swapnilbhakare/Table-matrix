@@ -186,7 +186,6 @@ export const createDynamicRow = (
     dynamicRow[firstColumnDataIndex] = "Total"; // Ensure it is the correct column at 0th index
     dynamicRow[`${firstColumnDataIndex}_class`] = "total-cell";
   }
-  console.log(firstColumnDataIndex);
 
   // Only calculate totals for the last two dynamicRowColumns
   const lastTwoDynamicRowColumns = dynamicRowColumns.slice(-2); // Get the last two dynamicRowColumns
@@ -226,7 +225,8 @@ export const createDynamicRow = (
 };
 
 export const generateRowBackgroundColorStyles = (
-  colorMap: Record<string, string>
+  colorMap: Record<string, string>,
+  borderColorMap: Record<string, string>
 ) => {
   return Object.entries(colorMap)
     .map(
@@ -235,14 +235,13 @@ export const generateRowBackgroundColorStyles = (
           /[^a-zA-Z0-9]/g,
           ""
         )} td:first-child {
-          background-color: ${color} !important;
-          color: white;
+          background:  ${borderColorMap[value]};
         }
         .first-column-background-${value.replace(
           /[^a-zA-Z0-9]/g,
           ""
         )} td:not(:first-child) {
-          border-bottom: 2px solid ${color} !important;
+          background:  ${borderColorMap[value]} !important;
         }
       `
     )
@@ -257,4 +256,15 @@ export const colorMap = {
   Premium: "#81C23E",
   "Super Premium": "#C355F3",
   default: "white",
+};
+
+export const borderColorMap = {
+  "Super Value": "#ffebec", // Light Red
+  Value: "#fceade", // Light Peach
+  Mainstream: "#ebf8ff", // Light Blue
+  "Upper Mainstream": "#fff6d8", // Light Yellow
+  Premium: "#f5fbef", // Light Green
+  "Super Premium": "#f6e7fd",
+  default: "white",
+  // Light Lavender
 };

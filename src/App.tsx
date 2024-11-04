@@ -18,9 +18,7 @@ import {
   aggregateData,
   calculateColumnWidth,
   sortByCustomOrder,
-  colorMap,
   createDynamicRow,
-  generateRowBackgroundColorStyles,
 } from "./utils/helper";
 import DataTable from "./Components/DataTable";
 import {
@@ -209,7 +207,11 @@ const App: React.FC<{
   const columnDefinitions = useMemo(() => {
     if (!columns.values) return [];
     const parentSubColumnMap = new Map<string, any[]>();
-    subCols.values.forEach((subCol, subColIndex) => {
+
+    const sortedSubCols = [...subCols.values].sort((a, b) => {
+      return b.localeCompare(a); // This sorts from Z to A
+    });
+    sortedSubCols.forEach((subCol, subColIndex) => {
       const parentCol = columns.values[subColIndex];
       if (!parentSubColumnMap.has(parentCol)) {
         parentSubColumnMap.set(parentCol, []);
@@ -230,23 +232,27 @@ const App: React.FC<{
               backgroundColor: "#295E7E",
               color: "white",
               textAlign: "center",
+              borderRadius: 0,
+              alignItem: "center",
             },
           }),
           render: (text: any, record: DataType) => {
             if (text === null || text === undefined || text === "") {
-              return <div>{""}</div>;
+              return <div style={{ textAlign: "center" }}> {""}</div>;
             }
 
             if (parentCol === "CAGR") {
-              console.log(record);
               const currentYearKey = `Current Year_${subCol}`; // Dynamically fetch Current Year value
               const previousYearKey = `2PY_${subCol}`; // Dynamically fetch 2PY value
               const currentYearSales = Number(record[currentYearKey]) || 0;
               const previousYearSales = Number(record[previousYearKey]) || 0;
-              console.log(currentYearKey);
-              console.log(previousYearKey);
+
               if (currentYearSales === 0 || previousYearSales === 0) {
-                return <div>{(0).toFixed(precisonPlace)}</div>; // Handle division by zero or missing data
+                return (
+                  <div style={{ textAlign: "center" }}>
+                    {(0).toFixed(precisonPlace)}
+                  </div>
+                ); // Handle division by zero or missing data
               }
 
               // Calculate result :CAGR- ((CY / 2PY) ^ 1/3) - 1
@@ -256,7 +262,7 @@ const App: React.FC<{
               const formattedCAGR = `${(result * 100).toFixed(precisonPlace)}%`;
 
               // Return the formatted result with color coding for positive/negative growth
-              return <div>{formattedCAGR}</div>;
+              return <div style={{ textAlign: "center" }}>{formattedCAGR}</div>;
             }
 
             const isAbsoluteColumn =
@@ -282,14 +288,14 @@ const App: React.FC<{
 
               if (parentCol === "% Growth (CY vs PY)") {
                 return (
-                  <div style={{ color }}>
+                  <div style={{ color, textAlign: "center" }}>
                     {`${roundedValue.toFixed(precisonPlace)}%`}
                   </div>
                 );
               }
 
               return (
-                <div style={{ color }}>
+                <div style={{ color, textAlign: "center" }}>
                   {formatNumberWithCommas(roundedValue, precisonPlace)}
                 </div>
               );
@@ -297,7 +303,7 @@ const App: React.FC<{
 
             if (isGrowthColumn) {
               return (
-                <div>{`${formatNumberWithCommas(
+                <div style={{ textAlign: "center" }}>{`${formatNumberWithCommas(
                   Number(text),
                   precisonPlace
                 )}%`}</div>
@@ -305,7 +311,9 @@ const App: React.FC<{
             }
 
             return (
-              <div>{formatNumberWithCommas(Number(text), precisonPlace)}</div>
+              <div style={{ textAlign: "center" }}>
+                {formatNumberWithCommas(Number(text), precisonPlace)}
+              </div>
             );
             // formatNumberWithCommas(Number(text), precisonPlace)
           },
@@ -335,7 +343,7 @@ const App: React.FC<{
             }),
             render: (text: any, record: DataType) => {
               if (record.key === "dynamic_row_end") {
-                return <div>{""}</div>; // Empty string for dynamic_row_end
+                return <div style={{ textAlign: "center" }}>{""}</div>; // Empty string for dynamic_row_end
               }
               const keys = Object.keys(record).filter((key) => {
                 // Ensure that divisionVal and volumeVal are not included in the sum
@@ -388,7 +396,7 @@ const App: React.FC<{
                   const formattedDiff = diff.toFixed(precisonPlace);
                   const color = diff < 0 ? "red" : diff > 0 ? "green" : "black";
                   return (
-                    <div style={{ color }}>
+                    <div style={{ color, textAlign: "center" }}>
                       {formatNumberWithCommas(
                         Number(formattedDiff),
                         precisonPlace
@@ -416,7 +424,7 @@ const App: React.FC<{
                         : "black";
 
                     return (
-                      <div style={{ color: totalColor }}>
+                      <div style={{ color: totalColor, textAlign: "center" }}>
                         {formatNumberWithCommas(
                           Number(formattedTotalDiff),
                           precisonPlace
@@ -437,7 +445,7 @@ const App: React.FC<{
                       : "black";
 
                   return (
-                    <div style={{ color: totalColor }}>
+                    <div style={{ color: totalColor, textAlign: "center" }}>
                       {formatNumberWithCommas(
                         Number(formattedTotalDiff),
                         precisonPlace
@@ -488,10 +496,12 @@ const App: React.FC<{
                     : "black"; // Adjust the color logic
 
                 return (
-                  <span style={{ color }}>{`${formatNumberWithCommas(
+                  <div
+                    style={{ color, textAlign: "center" }}
+                  >{`${formatNumberWithCommas(
                     growthPercentage,
                     precisonPlace
-                  )}%`}</span>
+                  )}%`}</div>
                 );
               }
 
@@ -516,7 +526,9 @@ const App: React.FC<{
                   isNaN(totalCurrentYearValue) ||
                   isNaN(totalPreviousYearValue)
                 ) {
-                  return <div style={{ color: "black" }}>0</div>; // Handle missing data or division by zero
+                  return (
+                    <div style={{ color: "black", textAlign: "center" }}>0</div>
+                  ); // Handle missing data or division by zero
                 }
 
                 // Apply the CAGR formula: CAGR - (totalCurrentYearValue / totalPreviousYearValue) ** (1/3) - 1
@@ -536,11 +548,13 @@ const App: React.FC<{
                 )}%`;
 
                 // Return the formatted result with color coding for positive/negative growth
-                return <div>{formattedCAGR}</div>;
+                return (
+                  <div style={{ textAlign: "center" }}>{formattedCAGR}</div>
+                );
               }
 
               return (
-                <span style={{ color }}>
+                <div style={{ color, textAlign: "center" }}>
                   {isGrowthColumn
                     ? `${formatNumberWithCommas(
                         allColumnLogic === "normal"
@@ -558,7 +572,7 @@ const App: React.FC<{
                           : total,
                         precisonPlace
                       )}
-                </span>
+                </div>
               );
             },
           };
@@ -595,7 +609,7 @@ const App: React.FC<{
               const color =
                 Number(text) < 0 ? "red" : Number(text) > 0 ? "green" : "black";
               return (
-                <div style={{ color }}>
+                <div style={{ color, textAlign: "center" }}>
                   {formatNumberWithCommas(Number(text), precisonPlace)}
                 </div>
               );
@@ -623,7 +637,7 @@ const App: React.FC<{
         }),
         render: (text: any, record: DataType) => {
           if (text === null || text === undefined || text === "") {
-            return <div>{""}</div>; // Return empty string for missing values
+            return <div style={{ textAlign: "center" }}>{""}</div>; // Return empty string for missing values
           }
           const keys = Object.keys(record).filter(
             (key) =>
@@ -641,9 +655,9 @@ const App: React.FC<{
             roundedTotal < 0 ? "red" : roundedTotal > 0 ? "green" : "black";
 
           return (
-            <span style={{ color }}>
+            <div style={{ color, textAlign: "center" }}>
               {formatNumberWithCommas(total, precisonPlace)}
-            </span>
+            </div>
           );
         },
       };
@@ -665,6 +679,7 @@ const App: React.FC<{
                 display: "flex",
                 gap: "10px",
                 alignItems: "center",
+                textAlign: "center",
                 justifyContent: "center",
               }}
             >
@@ -786,7 +801,7 @@ const App: React.FC<{
                   whiteSpace: "nowrap",
                   textOverflow: "ellipsis",
                   textAlign: "center" as React.CSSProperties["textAlign"], // This will center the header text
-
+                  borderRadius: 0,
                   minWidth: 100, // Set min-width on cell content
                   maxWidth: 250, // Prevent excessive width
                 }}
@@ -802,6 +817,7 @@ const App: React.FC<{
 
     return [...columns];
   }, [rows]);
+
   const tableColumns: ColumnsType<DataType> = useMemo(
     () => [...dynamicRowColumns, ...columnDefinitions],
     [dynamicRowColumns, columnDefinitions]
@@ -933,17 +949,7 @@ const App: React.FC<{
     customOrder, // Add customOrder as dependency
   ]);
   const sortedTableData = sortByField(tableData, "Price Index");
-  console.log(sortedTableData, "sortedTableData");
-  useEffect(() => {
-    const styleSheet = document.createElement("style");
-    styleSheet.type = "text/css";
-    styleSheet.innerText = generateRowBackgroundColorStyles(colorMap);
-    document.head.appendChild(styleSheet);
 
-    return () => {
-      document.head.removeChild(styleSheet);
-    };
-  }, [colorMap]);
   return (
     <div className="custom-table">
       <div className="custom-table-dropdown">
@@ -960,6 +966,7 @@ const App: React.FC<{
             trigger={["click"]}
           >
             <Button
+              className="custom-dropdown-button"
               style={{
                 width: "180px",
                 display: "flex",
@@ -983,6 +990,7 @@ const App: React.FC<{
             trigger={["click"]}
           >
             <Button
+              className="custom-dropdown-button"
               style={{
                 width: "180px",
                 display: "flex",
