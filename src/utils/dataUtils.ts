@@ -31,7 +31,6 @@ export const formatNumberWithCommas = (
 
 export const mergeRows = (data, subcolDefination, uniqeParentCol) => {
   const mergedData = {};
-  console.log(data, "datadata");
   data.forEach((row) => {
     // Create a unique key based on dynamic rows
     const key = `"${row.dynamic_row_1}-${row.dynamic_row_2}-${row.dynamic_row_3}"`;
