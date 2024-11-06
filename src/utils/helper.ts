@@ -230,7 +230,8 @@ export const generateRowBackgroundColorStyles = (
 ) => {
   return Object.entries(colorMap)
     .map(
-      ([value, color]) => `
+      ([value, color]) =>
+        `
         .first-column-background-${value.replace(
           /[^a-zA-Z0-9]/g,
           ""

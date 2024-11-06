@@ -6,6 +6,7 @@ import {
   colorMap,
   borderColorMap,
 } from "../utils/helper";
+import { lineHeight } from "@mui/system";
 const DataTable = ({ tableColumns, tableData }) => {
   useEffect(() => {
     const styleSheet = document.createElement("style");
@@ -71,6 +72,9 @@ const DataTable = ({ tableColumns, tableData }) => {
                 borderBottom: 0,
                 color: "#fff",
                 textAlign: "center",
+                padding: 0,
+                margin: 0,
+                lineHeight: "0.9px",
               },
             },
           };
@@ -96,7 +100,7 @@ const DataTable = ({ tableColumns, tableData }) => {
             .replace(/[^a-zA-Z0-9]/g, "")}` || "first-column-background-default"
         );
       }}
-      scroll={{ x: "max-content", y: "calc(100vh - 100px)" }} // Horizontal and vertical scroll
+      scroll={{ x: "max-content", y: "calc(100vh - 1px)" }} // Horizontal and vertical scroll
     />
   );
 };

@@ -691,7 +691,7 @@ const App: React.FC<{
                   boxShadow: "none",
                   background: "none",
                   padding: "0px",
-                  fontSize: "24px",
+                  fontSize: "16px",
                   color: "#ffffff",
                 }}
               >
@@ -734,7 +734,7 @@ const App: React.FC<{
   ]);
 
   const dynamicRowColumns = useMemo(() => {
-    const fontStyle = "14px Arial"; // Font style for text width calculation
+    const fontStyle = "10px Arial"; // Font style for text width calculation
 
     // Helper function to calculate the text width using canvas
     const getTextWidth = (text: string, font: string) => {
@@ -950,6 +950,13 @@ const App: React.FC<{
   ]);
   const sortedTableData = sortByField(tableData, "Price Index");
 
+  const getButtonLabel = (selected, options) => {
+    if (selected.length === 0) return "All";
+    if (selected.length === options?.length) return "All";
+    if (selected.length === 1) return selected[0];
+    if (selected.length > 1 && selected?.length < 2) return selected.join(", ");
+    return "Multiple selected";
+  };
   return (
     <div className="custom-table">
       <div className="custom-table-dropdown">
@@ -973,7 +980,8 @@ const App: React.FC<{
                 justifyContent: "space-between",
               }}
             >
-              All <DownOutlined />
+              {getButtonLabel(selectedCheckboxes1, dropdownOptions[0])}{" "}
+              <DownOutlined />
             </Button>
           </Dropdown>
         </div>
@@ -997,12 +1005,13 @@ const App: React.FC<{
                 justifyContent: "space-between",
               }}
             >
-              All <DownOutlined />
+              {getButtonLabel(selectedCheckboxes2, dropdownOptions[1])}{" "}
+              <DownOutlined />
             </Button>
           </Dropdown>
         </div>
       </div>
-      <div style={{ height: "90vh", overflow: "auto" }}>
+      <div style={{ height: "95vh", overflow: "auto" }}>
         {tableData.length ? (
           <DataTable tableColumns={tableColumns} tableData={sortedTableData} />
         ) : (
